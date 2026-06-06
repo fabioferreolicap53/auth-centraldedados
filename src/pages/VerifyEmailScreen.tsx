@@ -52,6 +52,7 @@ export function VerifyEmailScreen() {
 
   if (success) {
     const appName = appKey === 'agenda' ? 'Agenda' : appKey === 'amarcap53' ? 'AMAR' : 'aplicativo';
+    const redirectUrl = getLoginUrlForApp(appKey);
 
     return (
       <div className="min-h-screen bg-surface flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
@@ -66,7 +67,7 @@ export function VerifyEmailScreen() {
             </p>
             <div className="space-y-4">
               <button
-                onClick={() => window.location.href = getLoginUrlForApp(appKey)}
+                onClick={() => window.location.href = redirectUrl}
                 className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-black text-white bg-slate-800 hover:bg-slate-900 transition-all uppercase tracking-wider"
               >
                 Ir para o Login {appKey ? `do ${appName}` : 'do aplicativo'}

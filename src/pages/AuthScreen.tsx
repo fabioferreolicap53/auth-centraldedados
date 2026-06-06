@@ -44,7 +44,7 @@ export function AuthScreen() {
 
   const appConfig = selectedApp ? APP_CONFIGS[selectedApp] : null;
   const authCollection = selectedCollection || appConfig?.collection || APP_CONFIGS[DEFAULT_APP_KEY].collection;
-  const showRegister = selectedApp === 'amarcap53';
+  const showRegister = true; // Habilita cadastro para todos os apps
 
   useEffect(() => {
     // Query param wins over previous local storage selection.
