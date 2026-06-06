@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { pb } from '../lib/pocketbase';
 import { Mail, Lock, Eye, EyeOff, CheckCircle2, ShieldAlert } from 'lucide-react';
-import { AppKey, extractTokenFromLocation, getAuthTargetFromToken, getLoginUrlForApp, persistAuthTarget } from '../lib/authTarget';
+import { AppKey, extractTokenFromLocation, getAuthTargetFromToken, getLoginUrlForApp, persistAuthTarget, resolveAuthTarget } from '../lib/authTarget';
 
 export function ConfirmEmailChangeScreen() {
   const [password, setPassword] = useState('');
@@ -13,12 +13,13 @@ export function ConfirmEmailChangeScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const redirectUrl = getLoginUrlForApp(appKey);
 
   useEffect(() => {
     const tokenParam = extractTokenFromLocation();
 
     if (tokenParam) {
-      const nextTarget = getAuthTargetFromToken(tokenParam);
+      const nextTarget = resolveAuthTarget(getAuthTargetFromToken(tokenParam));
       setToken(tokenParam);
       setAppKey(nextTarget.appKey);
       setTargetCollection(nextTarget.collectionRef || '');
@@ -27,6 +28,18 @@ export function ConfirmEmailChangeScreen() {
       setError('Token de confirmação inválido ou ausente. Por favor, solicite um novo link.');
     }
   }, []);
+
+  useEffect(() => {
+    if (!success || !redirectUrl || redirectUrl === '/') {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, 2500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [redirectUrl, success]);
 
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
@@ -77,12 +90,25 @@ export function ConfirmEmailChangeScreen() {
               O seu novo endereço de e-mail no <strong>{appName}</strong> foi confirmado com sucesso.
             </p>
             <div className="space-y-4">
+              {redirectUrl && redirectUrl !== '/' && (
+                <p className="text-xs text-slate-500">
+                  Redirecionando automaticamente para o login do {appName}...
+                </p>
+              )}
               <button
-                onClick={() => window.location.href = getLoginUrlForApp(appKey)}
+                onClick={() => window.location.href = redirectUrl}
                 className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-black text-white bg-slate-800 hover:bg-slate-900 transition-all uppercase tracking-wider"
               >
                 Ir para o Login {appKey ? `do ${appName}` : 'do aplicativo'}
               </button>
+              {redirectUrl && redirectUrl !== '/' && (
+                <a
+                  href={redirectUrl}
+                  className="block text-sm font-semibold text-slate-700 underline underline-offset-4"
+                >
+                  {redirectUrl}
+                </a>
+              )}
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 Ou feche esta janela e volte para o seu aplicativo.
               </p>

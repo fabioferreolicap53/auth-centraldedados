@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { pb } from '../lib/pocketbase';
 import { Activity, Mail, Lock, Building, Users, MapPin, ArrowRight, ArrowLeft, Eye, EyeOff, Calendar } from 'lucide-react';
 import { UNIDADES_EQUIPES, MICROAREAS } from '../constants/regionalData';
-import { AppKey, DEFAULT_APP_KEY, KNOWN_APPS, getStoredAuthTarget, persistAuthTarget } from '../lib/authTarget';
+import { AppKey, DEFAULT_APP_KEY, KNOWN_APPS, getLoginUrlForApp, getStoredAuthTarget, persistAuthTarget } from '../lib/authTarget';
 
 type AuthState = 'login' | 'register' | 'forgot_password';
 
@@ -45,6 +45,7 @@ export function AuthScreen() {
   const appConfig = selectedApp ? APP_CONFIGS[selectedApp] : null;
   const authCollection = selectedCollection || appConfig?.collection || APP_CONFIGS[DEFAULT_APP_KEY].collection;
   const showRegister = true; // Habilita cadastro para todos os apps
+  const appLoginUrl = getLoginUrlForApp(selectedApp);
 
   useEffect(() => {
     // Query param wins over previous local storage selection.
@@ -228,6 +229,20 @@ export function AuthScreen() {
           {successMsg && (
             <div className="mb-4 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
               <p className="text-sm text-green-700">{successMsg}</p>
+            </div>
+          )}
+
+          {authState === 'login' && selectedApp && appLoginUrl !== '/' && (
+            <div className="mb-4 rounded-md border border-primary/20 bg-primary/5 p-4">
+              <p className="text-sm text-on-surface/80">
+                App selecionado: <span className="font-bold">{appConfig?.name}</span>
+              </p>
+              <a
+                href={appLoginUrl}
+                className="mt-2 inline-flex text-sm font-semibold text-primary underline underline-offset-4"
+              >
+                Abrir tela do {appConfig?.name}
+              </a>
             </div>
           )}
 

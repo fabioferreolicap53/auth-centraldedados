@@ -120,6 +120,11 @@ export const getStoredAuthTarget = () => {
   };
 };
 
+export const getAppKeyFromSearch = (search: string = window.location.search) => {
+  const appParam = new URLSearchParams(search).get('app');
+  return appParam && appParam in KNOWN_APPS ? (appParam as AppKey) : null;
+};
+
 export const getAuthTargetFromToken = (token: string) => {
   const collectionRef = extractAuthCollectionId(token);
   const appKey = getKnownAppKeyFromCollection(collectionRef);
@@ -127,6 +132,29 @@ export const getAuthTargetFromToken = (token: string) => {
   return {
     collectionRef,
     appKey,
+  };
+};
+
+export const resolveAuthTarget = (
+  target: {
+    appKey?: AppKey | null;
+    collectionRef?: string | null;
+  },
+  location: Location = window.location,
+) => {
+  const queryAppKey = getAppKeyFromSearch(location.search);
+  const storedTarget = getStoredAuthTarget();
+  const appKey = queryAppKey || target.appKey || storedTarget.appKey || null;
+
+  const collectionRef =
+    target.collectionRef ||
+    (queryAppKey ? KNOWN_APPS[queryAppKey].collection : null) ||
+    storedTarget.collectionRef ||
+    (appKey ? KNOWN_APPS[appKey].collection : null);
+
+  return {
+    appKey,
+    collectionRef,
   };
 };
 
