@@ -144,7 +144,9 @@ export const resolveAuthTarget = (
 ) => {
   const queryAppKey = getAppKeyFromSearch(location.search);
   const storedTarget = getStoredAuthTarget();
-  const appKey = queryAppKey || target.appKey || storedTarget.appKey || null;
+  const targetAppKeyFromCollection = getKnownAppKeyFromCollection(target.collectionRef);
+  const hasExplicitTarget = Boolean(target.collectionRef || target.appKey || queryAppKey);
+  const appKey = queryAppKey || target.appKey || targetAppKeyFromCollection || (!hasExplicitTarget ? storedTarget.appKey : null) || null;
 
   const collectionRef =
     target.collectionRef ||
